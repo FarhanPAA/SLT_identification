@@ -1,9 +1,9 @@
-tender_prices = [100000, 95000, 105000, 98000]
+# Sample data
+
+tender_prices = [100000, 95000, 105000, 98000, 98500,99500,99001]
 estimated_price = 99000
 NPPI = 0.85
-eligibility = [False, True, True, True]
-
-
+eligibility = [False, True, True, True, True, True, True]
 def slt(tender_prices, estimated_price, NPPI, eligibility):
     """
     Calculate the Single Lowest Tender (SLT) price based on tender prices,
@@ -18,7 +18,7 @@ def slt(tender_prices, estimated_price, NPPI, eligibility):
     Returns:
     float: Lower limit of acceptable price
     """
-    tender_prices = [price for price, eligible in zip(tender_prices, eligibility) if eligible and price > 1.1*estimated_price]
+    tender_prices = [price for price, eligible in zip(tender_prices, eligibility) if eligible and price < 1.1*estimated_price]
 
     if len(tender_prices) < 2:
         return None  # No eligible tender prices
@@ -31,3 +31,6 @@ def slt(tender_prices, estimated_price, NPPI, eligibility):
     sd = (sum((price - x_bar) ** 2 for price in tender_prices) / len(tender_prices)) ** 0.5
 
     return x_bar - sd
+
+lower_limit = slt(tender_prices, estimated_price, NPPI, eligibility)
+print(f"SLT lower limit: {lower_limit}")
