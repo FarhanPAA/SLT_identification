@@ -41,5 +41,3 @@ def slt(tender_prices, estimated_price, NPPI, eligibility):
 
     # Return the lower limit
     return x_bar - sd
-
-print("Lower limit of acceptable price (SLT):", slt(tender_prices, estimated_price, NPPI, eligibility))
