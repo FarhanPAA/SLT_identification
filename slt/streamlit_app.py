@@ -30,7 +30,7 @@ def run() -> None:
         estimated_price = st.number_input(
             "Estimated price",
             min_value=0.0,
-            value=0.0,
+            value=None,
             step=1.0,
             format="%.2f",
         )
@@ -38,7 +38,7 @@ def run() -> None:
         nppi = st.number_input(
             "NPPI",
             min_value=0.0,
-            value=0.0,
+            value=None,
             step=0.0001,
             format="%.4f",
             help="Non-Performing Price Index factor.",
@@ -46,7 +46,7 @@ def run() -> None:
 
     st.subheader("Tenderers")
     tenderer_names: list[str] = []
-    tender_prices: list[float] = []
+    tender_prices: list[float | None] = []
     eligibility: list[bool] = []
 
     for tenderer_index in range(st.session_state.tenderer_count):
@@ -66,7 +66,7 @@ def run() -> None:
                 st.number_input(
                     f"Tenderer {tenderer_index + 1} price",
                     min_value=0.0,
-                    value=0.0,
+                    value=None,
                     step=1.0,
                     format="%.2f",
                     key=f"tender_price_{tenderer_index}",
@@ -97,8 +97,21 @@ def run() -> None:
     st.divider()
 
     if st.button("Calculate SLT", use_container_width=True):
+        if estimated_price is None or nppi is None or any(price is None for price in tender_prices):
+            st.warning("Please enter Estimated price, NPPI, and a price for every tenderer before calculating.")
+            return
+
+        if any(price <= 0 for price in tender_prices if price is not None):
+            st.error("All tender prices must be greater than 0.")
+            return
+
         try:
-            result = compute_slt(tender_prices, estimated_price, nppi, eligibility)
+            result = compute_slt(
+                [price for price in tender_prices if price is not None],
+                float(estimated_price),
+                float(nppi),
+                eligibility,
+            )
         except ValueError as exc:
             st.error(str(exc))
             return
@@ -131,4 +144,3 @@ def run() -> None:
                 }
             )
         st.dataframe(rows, use_container_width=True, hide_index=True)
-
